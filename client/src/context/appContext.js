@@ -65,13 +65,13 @@ const initialState = {
   sort: 'latest',
   sortOptions: ['latest', 'oldest', 'a-z', 'z-a'],
 };
-const HOST="https://job-tracker-2023.onrender.com"
+const HOST="https://job-tracker-2023.onrender.com/api/v1"
 const AppContext = React.createContext();
 
 const AppProvider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   //axios
-  const authFetch = axios.create({ baseURL: HOST+'/api/v1' });
+  const authFetch = axios.create({ baseURL: HOST });
 
   //request
 
@@ -102,7 +102,7 @@ const AppProvider = ({ children }) => {
     dispatch({ type: SETUP_USER_BEGIN });
     try {
       const { data } = await axios.post(
-        `${HOST}/api/v1/auth/${endPoint}`,
+        `${HOST}/auth/${endPoint}`,
         currentUser
       );
 
