@@ -65,13 +65,13 @@ const initialState = {
   sort: 'latest',
   sortOptions: ['latest', 'oldest', 'a-z', 'z-a'],
 };
-
+const HOST="https://job-tracker-2023.onrender.com"
 const AppContext = React.createContext();
 
 const AppProvider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   //axios
-  const authFetch = axios.create({ baseURL: '/api/v1' });
+  const authFetch = axios.create({ baseURL: HOST+'/api/v1' });
 
   //request
 
@@ -102,7 +102,7 @@ const AppProvider = ({ children }) => {
     dispatch({ type: SETUP_USER_BEGIN });
     try {
       const { data } = await axios.post(
-        `/api/v1/auth/${endPoint}`,
+        `${HOST}/api/v1/auth/${endPoint}`,
         currentUser
       );
 
@@ -126,14 +126,14 @@ const AppProvider = ({ children }) => {
   };
 
   const logoutUser = async () => {
-    await authFetch.get('/auth/logout');
+    await authFetch.get(HOST+'/auth/logout');
     dispatch({ type: LOGOUT_USER });
   };
 
   const updateUser = async (currentUser) => {
     dispatch({ type: UPDATE_USER_BEGIN });
     try {
-      const { data } = await authFetch.patch('/auth/updateUser', currentUser);
+      const { data } = await authFetch.patch(HOST+'/auth/updateUser', currentUser);
       const { user, location } = data;
       dispatch({
         type: UPDATE_USER_SUCESS,
@@ -162,7 +162,7 @@ const AppProvider = ({ children }) => {
     dispatch({ type: CREATE_JOB_BEGIN });
     try {
       const { position, company, jobLocation, jobType, status } = state;
-      await authFetch.post('/jobs', {
+      await authFetch.post(HOST+'/jobs', {
         position,
         company,
         jobLocation,
@@ -184,7 +184,7 @@ const AppProvider = ({ children }) => {
   const getJobs = async () => {
     const { page, search, searchStatus, searchType, sort } = state;
 
-    let url = `/jobs?page=${page}&status=${searchStatus}&jobType=${searchType}&sort=${sort}`;
+    let url = `${HOST}/jobs?page=${page}&status=${searchStatus}&jobType=${searchType}&sort=${sort}`;
     if (search) url = url + `&search=${search}`;
     // console.log(url);
     dispatch({ type: GET_JOBS_BEGIN });
@@ -216,7 +216,7 @@ const AppProvider = ({ children }) => {
     dispatch({ type: EDIT_JOB_BEGIN });
     try {
       const { position, company, jobLocation, jobType, status } = state;
-      await authFetch.patch(`/jobs/${state.editJobId}`, {
+      await authFetch.patch(`${HOST}/jobs/${state.editJobId}`, {
         company,
         position,
         jobLocation,
@@ -238,7 +238,7 @@ const AppProvider = ({ children }) => {
   const deleteJob = async (jobId) => {
     try {
       dispatch({ type: DELETE_JOB_BEGIN });
-      await authFetch.delete(`/jobs/${jobId}`);
+      await authFetch.delete(`${HOST}/jobs/${jobId}`);
       getJobs();
     } catch (error) {
       if (error.response.status === 401) return;
@@ -253,7 +253,7 @@ const AppProvider = ({ children }) => {
   const showStats = async () => {
     dispatch({ type: SHOW_STATS_BEGIN });
     try {
-      const { data } = await authFetch('/jobs/stats');
+      const { data } = await authFetch(HOST+'/jobs/stats');
       // console.log(data);
       dispatch({
         type: SHOW_STATS_SUCESS,
@@ -280,7 +280,7 @@ const AppProvider = ({ children }) => {
   const getCurrentUser = async () => {
     dispatch({ type: GET_CURRENT_USER_BEGIN });
     try {
-      const { data } = await authFetch('/auth/getCurrentUser');
+      const { data } = await authFetch(HOST+'/auth/getCurrentUser');
       const { user, location } = data;
       dispatch({
         type: GET_CURRENT_USER_SUCESS,
