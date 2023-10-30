@@ -8,11 +8,12 @@ import helmet from 'helmet';
 import xss from 'xss-clean';
 import mongoSanitize from 'express-mongo-sanitize';
 import cookieParser from 'cookie-parser';
+import cors from 'cors'
+import morgan from 'morgan';
 
 dotenv.config();
-import morgan from 'morgan';
 const app = express();
-
+app.use(cors())
 //db and authencateUser
 import connectDB from './db/connect.js';
 
