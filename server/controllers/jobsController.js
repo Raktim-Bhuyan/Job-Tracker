@@ -101,6 +101,7 @@ const deleteJob = async (req, res) => {
   res.status(StatusCodes.OK).json({ msg: 'Success! Job removed' });
 };
 const showStats = async (req, res) => {
+  console.log(req.user.userId)
   let stats = await Job.aggregate([
     { $match: { createdBy: new mongoose.Types.ObjectId(req.user.userId) } },
     { $group: { _id: '$status', count: { $sum: 1 } } },

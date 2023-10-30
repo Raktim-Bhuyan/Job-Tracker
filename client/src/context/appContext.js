@@ -1,6 +1,8 @@
 import React, { useReducer, useContext, useEffect } from 'react';
 import reducer from './reducers';
+
 import axios from 'axios';
+import Cookies from 'js-cookie';
 import {
   CLEAR_ALERT,
   DISPLAY_ALERT,
@@ -106,7 +108,8 @@ const AppProvider = ({ children }) => {
         currentUser
       );
 
-      const { user, location } = data;
+      const { user, location , token } = data;
+      Cookies.set('auth-token',token,{expires:365})
       dispatch({
         type: SETUP_USER_SUCESS,
         payload: { user, location, alertText },
@@ -126,14 +129,19 @@ const AppProvider = ({ children }) => {
   };
 
   const logoutUser = async () => {
-    await authFetch.get(HOST+'/auth/logout');
+    Cookies.remove("auth-token")
     dispatch({ type: LOGOUT_USER });
+    window.location.href='/landing'
   };
 
   const updateUser = async (currentUser) => {
     dispatch({ type: UPDATE_USER_BEGIN });
     try {
-      const { data } = await authFetch.patch(HOST+'/auth/updateUser', currentUser);
+      const { data } = await authFetch.patch(HOST+'/auth/updateUser', currentUser,{
+        headers:{
+          "auth-token":Cookies.get('auth-token')
+        }
+      });
       const { user, location } = data;
       dispatch({
         type: UPDATE_USER_SUCESS,
@@ -168,6 +176,10 @@ const AppProvider = ({ children }) => {
         jobLocation,
         jobType,
         status,
+      },{
+        headers:{
+          "auth-token":Cookies.get('auth-token')
+        }
       });
       dispatch({ type: CREATE_JOB_SUCESS });
       dispatch({ type: CLEAR_VALUES });
@@ -189,7 +201,11 @@ const AppProvider = ({ children }) => {
     // console.log(url);
     dispatch({ type: GET_JOBS_BEGIN });
     try {
-      const { data } = await authFetch(url);
+      const { data } = await axios.get(url,{
+        headers:{
+          "auth-token":Cookies.get('auth-token')
+        }
+      })
       // console.log(data);
       const { jobs, totalJobs, numOfPages } = data;
 
@@ -216,12 +232,16 @@ const AppProvider = ({ children }) => {
     dispatch({ type: EDIT_JOB_BEGIN });
     try {
       const { position, company, jobLocation, jobType, status } = state;
-      await authFetch.patch(`${HOST}/jobs/${state.editJobId}`, {
+      await axios.patch(`${HOST}/jobs/${state.editJobId}`, {
         company,
         position,
         jobLocation,
         jobType,
         status,
+      },{
+        headers:{
+          "auth-token":Cookies.get('auth-token')
+        }
       });
       dispatch({ type: EDIT_JOB_SUCESS });
       dispatch({ type: CLEAR_VALUES });
@@ -238,7 +258,11 @@ const AppProvider = ({ children }) => {
   const deleteJob = async (jobId) => {
     try {
       dispatch({ type: DELETE_JOB_BEGIN });
-      await authFetch.delete(`${HOST}/jobs/${jobId}`);
+      await axios.post(`${HOST}/jobs/${jobId}`,{},{
+        headers:{
+          "auth-token":Cookies.get('auth-token')
+        }
+      });
       getJobs();
     } catch (error) {
       if (error.response.status === 401) return;
@@ -253,7 +277,11 @@ const AppProvider = ({ children }) => {
   const showStats = async () => {
     dispatch({ type: SHOW_STATS_BEGIN });
     try {
-      const { data } = await authFetch(HOST+'/jobs/stats');
+      const { data } = await axios.get(HOST+'/jobs/stats',{
+        headers:{
+          "auth-token":Cookies.get('auth-token')
+        }
+      });
       // console.log(data);
       dispatch({
         type: SHOW_STATS_SUCESS,
@@ -280,19 +308,26 @@ const AppProvider = ({ children }) => {
   const getCurrentUser = async () => {
     dispatch({ type: GET_CURRENT_USER_BEGIN });
     try {
-      const { data } = await authFetch(HOST+'/auth/getCurrentUser');
+      const { data } = await axios.get(HOST+'/auth/getCurrentUser',{
+        headers:{
+          "auth-token":Cookies.get('auth-token')
+        }
+      });
       const { user, location } = data;
       dispatch({
         type: GET_CURRENT_USER_SUCESS,
         payload: { user, location },
       });
     } catch (error) {
-      if (error.response.status === 401) return;
-      logoutUser();
+      if (error.response.status === 401){ 
+        logoutUser();
+        return;
+      }
     }
   };
 
   useEffect(() => {
+    if(window.location.pathname==='/')
     getCurrentUser();
   }, []);
 

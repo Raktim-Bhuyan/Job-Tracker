@@ -19,7 +19,7 @@ const register = async (req, res) => {
   const user = await User.create({ name, email, password });
 
   const token = user.createJWT();
-  attachCookies({ res, token });
+  // attachCookies({ res, token });
   res.status(StatusCodes.CREATED).json({
     user: {
       email: user.email,
@@ -28,6 +28,7 @@ const register = async (req, res) => {
       name: user.name,
     },
     location: user.location,
+    token:token
   });
 };
 
@@ -49,8 +50,8 @@ const login = async (req, res) => {
   }
   user.password = undefined;
   const token = user.createJWT();
-  attachCookies({ res, token });
-  res.status(StatusCodes.OK).json({ user, location: user.location });
+  // attachCookies({ res, token });
+  res.status(StatusCodes.OK).json({ user, location: user.location,token:token });
   // res.send('login user');
 };
 
@@ -72,7 +73,7 @@ const updateUser = async (req, res) => {
 
   const token = user.createJWT();
   attachCookies({ res, token });
-  res.status(StatusCodes.OK).json({ user, location: user.location });
+  res.status(StatusCodes.OK).json({ user, location: user.location ,token:token});
 };
 
 const getCurrentUser = async (req, res) => {

@@ -58,8 +58,8 @@ const Register = () => {
   useEffect(() => {
     if (user) {
       setTimeout(() => {
-        navigate('/');
-      }, 3000);
+        window.location.href='/'
+      }, 1000);
     }
   }, [user, navigate]);
   return (
